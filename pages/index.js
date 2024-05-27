@@ -1,12 +1,16 @@
 import React from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { Canvas, useThree, useLoader } from "@react-three/fiber";
 import { useDrag } from "@use-gesture/react"; // No need to import separately
 import { useSpring, a } from "@react-spring/three";
 import styles from "../styles/Home.module.css";
+import * as THREE from 'three';
+import { Box } from "@react-three/drei";
+
 
 function Obj() {
   const { size, viewport } = useThree();
   const aspect = size.width / viewport.width;
+  const frontTexture = useLoader(THREE.TextureLoader, `/textures/eagle.jpg`);
 
   const [spring, set] = useSpring(() => ({
     position: [0, 0, 0],
@@ -30,8 +34,12 @@ function Obj() {
 
   return (
     <a.mesh {...spring} {...bind()} castShadow>
-      <sphereGeometry args={[1, 64, 64]} />
-      <meshNormalMaterial />
+      <Box args={[1.5, 2, 0.01]}>
+        <meshBasicMaterial
+          map={frontTexture}
+          side={THREE.FrontSide}
+        />
+      </Box>
     </a.mesh>
   );
 }
