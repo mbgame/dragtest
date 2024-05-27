@@ -13,6 +13,8 @@ function Obj() {
   const frontTexture = useLoader(THREE.TextureLoader, `/textures/eagle.jpg`);
   const meshRef = useRef();
   const [isCardEnlarged,setIsCardEnlarged] = useState(false)
+  const [dragPosition,setDragPOsition] = useState([])
+  const [mousePos,setMousePos] = useState([])
   const [spring, api] = useSpring(() => ({
     position:[0,0,0],
     rotation:[0,0,0],
@@ -42,10 +44,12 @@ function Obj() {
         if (!isCardEnlarged) { 
 
           const newPosition = [
-            -1 + x / viewport.factor * 1.5,
-            1 + 0.2 - y / viewport.factor * 1.5,
+            x / aspect,
+            -y / aspect,
             0,
           ];
+          setDragPOsition(newPosition)
+          setMousePos([x,y])
             api.start({
               position:  newPosition ,
               rotation: [0, 0, 0],
@@ -68,17 +72,17 @@ function Obj() {
         }
       },
     },
-    { drag: { filterTaps: true, threshold: 10,
+    { drag: { filterTaps: true, threshold: 50,
       // bounds: { top: -300, bottom: 100 },
-      from:()=>{
-      // if(dragPosition[1] === position[1]){
-        return [0,0]
+      // from:()=>{
+      // if(dragPosition[1] === 1){
+      //   return [0,0]
       // }
       // else{
-      //   return [mousePos[0],mousePos[1]]
+        // return [mousePos[0],mousePos[1]]
       // }
       
-    }
+    // }
     
     } } // Adjust threshold for better touch sensitivity
   );
