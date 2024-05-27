@@ -1,38 +1,38 @@
-import { createRoot } from 'react-dom/client'
-import React, { useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import React from "react"
+import { Canvas, useThree } from "@react-three/fiber"
+import { useDrag } from "@use-gesture/react"
+import { useSpring, a } from "@react-spring/three"
+import styles from "../styles/Home.module.css"
 
-function Box(props) {
-  // This reference gives us direct access to the THREE.Mesh object
-  const ref = useRef()
-  // Hold state for hovered and clicked events
-  const [hovered, hover] = useState(false)
-  const [clicked, click] = useState(false)
-  // Subscribe this component to the render-loop, rotate the mesh every frame
-  useFrame((state, delta) => (ref.current.rotation.x += delta))
-  // Return the view, these are regular Threejs elements expressed in JSX
+function Obj() {
+  const { size, viewport } = useThree()
+  const aspect = size.width / viewport.width
+  const [spring, set] = useSpring(() => ({ position: [0, 0, 0], config: { mass: 1, friction: 40, tension: 800 } }))
+  const bind = useDrag(({ movement: [x, y], down }) =>
+    set({ config: { mass: down ? 1 : 4, tension: down ? 2000 : 800 }, position: down ? [x / aspect, -y / aspect, 0] : [0, 0, 0] })
+  )
   return (
-    <mesh
-      {...props}
-      ref={ref}
-      scale={clicked ? 1.5 : 1}
-      onClick={(event) => click(!clicked)}
-      onPointerOver={(event) => hover(true)}
-      onPointerOut={(event) => hover(false)}>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color={hovered ? 'hotpink' : 'orange'} />
-    </mesh>
+    <a.mesh {...spring} {...bind()} castShadow>
+      <sphereGeometry args={[1, 64, 64]} />
+      <meshNormalMaterial />
+    </a.mesh>
   )
 }
 
  const Home = () => {
   return (
-  <Canvas>
-    <ambientLight />
-    <pointLight position={[10, 10, 10]} />
-    <Box position={[-1.2, 0, 0]} />
-    <Box position={[1.2, 0, 0]} />
-  </Canvas>
+    <home className={styles.container}>
+      <Canvas shadows camera={{ position: [0, 0, 5] }}>
+      <ambientLight intensity={0.5} />
+      <spotLight intensity={0.6} position={[20, 10, 10]} angle={0.15} penumbra={1} shadow-mapSize={[2048, 2048]} castShadow />
+      <mesh receiveShadow position={[0, 0, -1]}>
+        <planeGeometry args={[1000, 1000]} />
+        <meshStandardMaterial color="#303040" />
+      </mesh>
+      <Obj />
+    </Canvas>
+
+    </home>
 
   )
 }
