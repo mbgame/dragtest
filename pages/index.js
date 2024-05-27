@@ -72,7 +72,7 @@ function Obj() {
         }
       },
     },
-    { drag: { filterTaps: true, threshold: 50,
+    { drag: { filterTaps: true, threshold: 20,
       // bounds: { top: -300, bottom: 100 },
       // from:()=>{
       // if(dragPosition[1] === 1){
