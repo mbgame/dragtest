@@ -1,6 +1,6 @@
 import React,{useRef, useState} from "react";
 import { Canvas, useThree, useLoader } from "@react-three/fiber";
-import { useDrag } from "@use-gesture/react"; // No need to import separately
+import { useDrag, useGesture } from "@use-gesture/react"; // No need to import separately
 import { useSpring, a } from "@react-spring/three";
 import styles from "../styles/Home.module.css";
 import * as THREE from 'three';
@@ -20,21 +20,67 @@ function Obj() {
     config: { mass: 2, tension: 400, friction: 40 }, // Adjust spring values as needed
   }));
 
-  const bind = 
-    useDrag(({ movement: [x, y], down, event }) => {
-      if(!isCardEnlarged){
-        if (event.type.includes('touch')) {
-          event.stopPropagation(); 
-          event.preventDefault();
+  // const bind =  useDrag(({ movement: [x, y], down, event }) => {
+  //     if(!isCardEnlarged){
+  //       if (event.type.includes('touch')) {
+  //         event.stopPropagation(); 
+  //         event.preventDefault();
+  //       }
+  //       api.start({
+  //         config: { mass: down ? 1 : 4, tension: down ? 2000 : 800 },
+  //         position: down ? [x / aspect, -y / aspect, 0] : [0, 0, 0],
+  //       });
+  //     }
+  //   },
+  //   // Enable touch events:
+  //   { eventOptions: { passive: false },eventType: 'all', } 
+  // );
+
+  const bind = useGesture(
+    {
+      onDrag: ({ offset: [x,y], event, down, first }) => {
+        if (!isCardEnlarged) { 
+
+          const newPosition = [
+            -1 + x / viewport.factor * 1.5,
+            1 + 0.2 - y / viewport.factor * 1.5,
+            0,
+          ];
+            api.start({
+              position:  newPosition ,
+              rotation: [0, 0, 0],
+              config: { mass: 0.1, tension: 100, friction: 20 },
+            });
         }
-        api.start({
-          config: { mass: down ? 1 : 4, tension: down ? 2000 : 800 },
-          position: down ? [x / aspect, -y / aspect, 0] : [0, 0, 0],
-        });
-      }
+       
+      },
+      onDragEnd: ({ offset: [x,y], event }) => {
+        event.stopPropagation(); // Prevent default touch behavior
+        if(!isCardEnlarged ){
+          const newPosition = [
+            -1 + x / viewport.factor * 1.5,
+            1 + 0.2 - y / viewport.factor * 1.5,
+            0,
+          ];
+
+          // const dir =  swipeFinder(newPosition)
+          // handleSwipe(dir);
+        }
+      },
     },
-    // Enable touch events:
-    { eventOptions: { passive: false },eventType: 'all', } 
+    { drag: { filterTaps: true, threshold: 10,
+      // bounds: { top: -300, bottom: 100 },
+      from:()=>{
+      // if(dragPosition[1] === position[1]){
+        return [0,0]
+      // }
+      // else{
+      //   return [mousePos[0],mousePos[1]]
+      // }
+      
+    }
+    
+    } } // Adjust threshold for better touch sensitivity
   );
 
 /////////////////////
